@@ -3,6 +3,7 @@
     margin: 2px;
     padding: 2px;
     border: 1px solid black;
+    height:100px;
 }
 
 .cell:hover{
@@ -10,6 +11,17 @@
 }
 
 #game-board{
+    max-width: 500px;
+    max-height: 500px;
+    display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
+}
+
+.cell-x{
+    color: red;
+}
+
+.cell-o{
+    color: green;
 }
