@@ -1,0 +1,15 @@
+.cell{
+    background: #f3f3f3;
+    margin: 2px;
+    padding: 2px;
+    border: 1px solid black;
+}
+
+.cell:hover{
+    background: #d4d4d4;
+}
+
+#game-board{
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+}
