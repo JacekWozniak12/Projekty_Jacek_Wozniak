@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+*{
+    font-family: 'Roboto', sans-serif;
+}
+
 .cell{
     background: #f3f3f3;
     margin: 2px;
@@ -24,4 +30,45 @@
 
 .cell-o{
     color: green;
+}
+
+.game-gui{
+    width: 500px;
+    margin: 0 auto;
+}
+
+.player_desc, .player_title{
+    display: inline-block;
+    margin: 5px;
+    padding: 5px;
+}
+
+.player_title{
+    border: 1px solid black;
+}
+
+.player_desc:first-of-type{
+    margin-left: 0;
+}
+
+.player_desc:last-of-type{
+    margin-right: 0;
+}
+
+.active{
+    background-color: #dd3333;
+    color: #f3f3f3;
+}
+
+.inactive{
+    background-color: #f3f3f3;
+    color: #dd3333;
+}
+
+.game-info{
+    margin: 0 auto;
+    display: flex;
+    flex: auto;
+    align-items: center;
+    justify-content: center;
 }
