@@ -2,7 +2,6 @@ const element_P1 = document.querySelector("#player1");
 const element_P2 = document.querySelector("#player2");
 const element_Score_P1 = document.querySelector(".player1-score");
 const element_Score_P2 = document.querySelector(".player2-score");
-
 const P1 : string = 'x';
 const P2 : string = 'o';
 let P1Score = 0;
@@ -83,12 +82,12 @@ class Board{
     }
 
     CheckIfFinished() : boolean{
-        if(this.movesAmount >= this.NUMBER_OF_MOVES){
-            this.DisplayDraw();
+        if(this.CheckIfWon(this.playerTurn)){
+            this.DisplayWin();
             return true;
         }
-        else if(this.CheckIfWon(this.playerTurn)){
-            this.DisplayWin();
+        else if(this.movesAmount >= this.NUMBER_OF_MOVES){
+            this.DisplayDraw();
             return true;
         }
         else return false;
@@ -107,11 +106,11 @@ class Board{
     }
 
     private RefreshGameBoard() {
-        this.Start();
         element_Score_P1.innerHTML = ""+P1Score;
         element_Score_P2.innerHTML = ""+P2Score;
-        this.movesAmount = 1;
+        this.movesAmount = 0;
         this.Draw("#game-board");
+        this.CurrentPlayer();
     }
 
     CheckIfWon(player : number) : boolean{
@@ -142,8 +141,8 @@ class Board{
             return true;
         }
         if (this.cells[2].content == checkFor &&
-            this.cells[5].content == checkFor &&
-            this.cells[8].content == checkFor) {
+            this.cells[4].content == checkFor &&
+            this.cells[6].content == checkFor) {
             return true;
         }
         if (this.cells[3].content == checkFor &&
@@ -193,10 +192,6 @@ class Cell{
 function GameHandler(){
     const gameBoard = new Board;
     gameBoard.Draw("#game-board");
-}
-
-function ScoreHandler(){
-
 }
 
 function SelectDeselect(current : HTMLDivElement, previous : HTMLDivElement ){

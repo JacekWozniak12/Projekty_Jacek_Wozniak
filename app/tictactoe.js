@@ -57,12 +57,12 @@ var Board = /** @class */ (function () {
         }
     };
     Board.prototype.CheckIfFinished = function () {
-        if (this.movesAmount >= this.NUMBER_OF_MOVES) {
-            this.DisplayDraw();
+        if (this.CheckIfWon(this.playerTurn)) {
+            this.DisplayWin();
             return true;
         }
-        else if (this.CheckIfWon(this.playerTurn)) {
-            this.DisplayWin();
+        else if (this.movesAmount >= this.NUMBER_OF_MOVES) {
+            this.DisplayDraw();
             return true;
         }
         else
@@ -81,11 +81,11 @@ var Board = /** @class */ (function () {
         this.RefreshGameBoard();
     };
     Board.prototype.RefreshGameBoard = function () {
-        this.Start();
         element_Score_P1.innerHTML = "" + P1Score;
         element_Score_P2.innerHTML = "" + P2Score;
-        this.movesAmount = 1;
+        this.movesAmount = 0;
         this.Draw("#game-board");
+        this.CurrentPlayer();
     };
     Board.prototype.CheckIfWon = function (player) {
         var checkFor;
@@ -115,8 +115,8 @@ var Board = /** @class */ (function () {
             return true;
         }
         if (this.cells[2].content == checkFor &&
-            this.cells[5].content == checkFor &&
-            this.cells[8].content == checkFor) {
+            this.cells[4].content == checkFor &&
+            this.cells[6].content == checkFor) {
             return true;
         }
         if (this.cells[3].content == checkFor &&
@@ -158,8 +158,6 @@ var Cell = /** @class */ (function () {
 function GameHandler() {
     var gameBoard = new Board;
     gameBoard.Draw("#game-board");
-}
-function ScoreHandler() {
 }
 function SelectDeselect(current, previous) {
     Select(current);
