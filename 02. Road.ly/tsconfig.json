@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "outDir": "app",
+        "sourceMap": true
+    },
+    "include": [
+        "src/*"
+    ]
+}
