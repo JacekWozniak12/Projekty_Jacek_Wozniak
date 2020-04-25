@@ -16,6 +16,7 @@ var Board = /** @class */ (function () {
     Board.prototype.Draw = function (htmlElement) {
         var element_GameBoard = document.querySelector(htmlElement);
         element_GameBoard.innerHTML = "";
+        this.cells = new Array();
         for (var i = 0; i < 9; i++) {
             this.CreateCell(i, element_GameBoard);
         }
@@ -83,7 +84,7 @@ var Board = /** @class */ (function () {
         this.Start();
         element_Score_P1.innerHTML = "" + P1Score;
         element_Score_P2.innerHTML = "" + P2Score;
-        this.movesAmount = 0;
+        this.movesAmount = 1;
         this.Draw("#game-board");
     };
     Board.prototype.CheckIfWon = function (player) {
@@ -139,16 +140,18 @@ var Cell = /** @class */ (function () {
         this.representation = representation;
     }
     Cell.prototype.SelectedCell = function () {
-        if (this.board.playerTurn == 1) {
-            this.content = P1;
-            this.representation.innerHTML = P1;
+        if (this.content == "") {
+            if (this.board.playerTurn == 1) {
+                this.content = P1;
+                this.representation.innerHTML = P1;
+            }
+            else if (this.board.playerTurn == 2) {
+                this.content = P2;
+                this.representation.innerHTML = P2;
+            }
+            this.board.CellWasSelected();
+            this.representation.click = null;
         }
-        else if (this.board.playerTurn == 2) {
-            this.content = P2;
-            this.representation.innerHTML = P2;
-        }
-        this.board.CellWasSelected();
-        this.representation.click = null;
     };
     return Cell;
 }());

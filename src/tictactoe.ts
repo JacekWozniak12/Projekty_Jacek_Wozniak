@@ -20,6 +20,7 @@ class Board{
         
         const element_GameBoard = document.querySelector(htmlElement);
         element_GameBoard.innerHTML = "";
+        this.cells = new Array();
 
         for(let i = 0; i < 9; i++){
             this.CreateCell(i, element_GameBoard);
@@ -109,7 +110,7 @@ class Board{
         this.Start();
         element_Score_P1.innerHTML = ""+P1Score;
         element_Score_P2.innerHTML = ""+P2Score;
-        this.movesAmount = 0;
+        this.movesAmount = 1;
         this.Draw("#game-board");
     }
 
@@ -172,6 +173,7 @@ class Cell{
     }
 
     SelectedCell(){
+        if(this.content == ""){
 
             if(this.board.playerTurn == 1){
                 this.content = P1;
@@ -184,6 +186,7 @@ class Cell{
     
             this.board.CellWasSelected();
             this.representation.click = null;
+        }
     }
 }
 
