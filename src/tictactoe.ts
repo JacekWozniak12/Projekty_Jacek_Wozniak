@@ -1,7 +1,7 @@
 const element_P1 = document.querySelector("#player1");
 const element_P2 = document.querySelector("#player2");
-const element_Score_P1 = document.querySelector("player1-score");
-const element_Score_P2 = document.querySelector("player2-score");
+const element_Score_P1 = document.querySelector(".player1-score");
+const element_Score_P2 = document.querySelector(".player2-score");
 
 const P1 : string = 'x';
 const P2 : string = 'o';
@@ -19,6 +19,7 @@ class Board{
     Draw(htmlElement: string){
         
         const element_GameBoard = document.querySelector(htmlElement);
+        element_GameBoard.innerHTML = "";
 
         for(let i = 0; i < 9; i++){
             this.CreateCell(i, element_GameBoard);
@@ -50,7 +51,7 @@ class Board{
         c.representation = el;
 
         let binding = c.SelectedCell.bind(c);
-        el.addEventListener("click", binding, true);
+        el.addEventListener("click", binding);
         
         this.cells.push(c);
         element_GameBoard.appendChild(el);
@@ -85,27 +86,30 @@ class Board{
             this.DisplayDraw();
             return true;
         }
-        else{
-            if(this.CheckIfWon(this.playerTurn)){
-                return true;
-            }
-            else return false
+        else if(this.CheckIfWon(this.playerTurn)){
+            this.DisplayWin();
+            return true;
         }
+        else return false;
     }
 
     DisplayWin(){
         alert("Player "+this.playerTurn+" won");
-
-        this.Reset();
+        if(this.playerTurn == 1) P1Score++;
+        if(this.playerTurn == 2) P2Score++;
+        this.RefreshGameBoard();
     }
 
     DisplayDraw(){
         alert("Draw");
-        this.Reset();
+        this.RefreshGameBoard();
     }
 
-    private Reset() {
+    private RefreshGameBoard() {
         this.Start();
+        element_Score_P1.innerHTML = ""+P1Score;
+        element_Score_P2.innerHTML = ""+P2Score;
+        this.movesAmount = 0;
         this.Draw("#game-board");
     }
 
@@ -115,44 +119,43 @@ class Board{
         else checkFor = P2;
 
         // will do cleaner way, for now would suffice
-        if (this.cells[0].content = checkFor,
-            this.cells[1].content = checkFor,
-            this.cells[2].content = checkFor) {
+        if (this.cells[0].content == checkFor &&
+            this.cells[1].content == checkFor &&
+            this.cells[2].content == checkFor) {
             return true;
         }
 
-        if (this.cells[0].content = checkFor,
-            this.cells[3].content = checkFor,
-            this.cells[6].content = checkFor) {
+        if (this.cells[0].content == checkFor &&
+            this.cells[3].content == checkFor &&
+            this.cells[6].content == checkFor) {
             return true;
         }
-        if (this.cells[0].content = checkFor,
-            this.cells[4].content = checkFor,
-            this.cells[8].content = checkFor) {
+        if (this.cells[0].content == checkFor &&
+            this.cells[4].content == checkFor &&
+            this.cells[8].content == checkFor) {
             return true;
         }
-        if (this.cells[1].content = checkFor,
-            this.cells[4].content = checkFor,
-            this.cells[7].content = checkFor) {
+        if (this.cells[1].content == checkFor &&
+            this.cells[4].content == checkFor &&
+            this.cells[7].content == checkFor) {
             return true;
         }
-        if (this.cells[2].content = checkFor,
-            this.cells[5].content = checkFor,
-            this.cells[8].content = checkFor) {
+        if (this.cells[2].content == checkFor &&
+            this.cells[5].content == checkFor &&
+            this.cells[8].content == checkFor) {
             return true;
         }
-        if (this.cells[3].content = checkFor,
-            this.cells[4].content = checkFor,
-            this.cells[5].content = checkFor) {
+        if (this.cells[3].content == checkFor &&
+            this.cells[4].content == checkFor &&
+            this.cells[5].content == checkFor) {
             return true;
         }
-        if (this.cells[6].content = checkFor,
-            this.cells[7].content = checkFor,
-            this.cells[8].content = checkFor) {
+        if (this.cells[6].content == checkFor &&
+            this.cells[7].content == checkFor &&
+            this.cells[8].content == checkFor) {
             return true;
         }
         return false;
-        
     }
 }
 
@@ -179,8 +182,8 @@ class Cell{
                 this.representation.innerHTML = P2;
             }
     
-            this.representation.click = null;
             this.board.CellWasSelected();
+            this.representation.click = null;
     }
 }
 

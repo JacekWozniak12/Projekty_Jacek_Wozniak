@@ -1,7 +1,7 @@
 var element_P1 = document.querySelector("#player1");
 var element_P2 = document.querySelector("#player2");
-var element_Score_P1 = document.querySelector("player1-score");
-var element_Score_P2 = document.querySelector("player2-score");
+var element_Score_P1 = document.querySelector(".player1-score");
+var element_Score_P2 = document.querySelector(".player2-score");
 var P1 = 'x';
 var P2 = 'o';
 var P1Score = 0;
@@ -15,6 +15,7 @@ var Board = /** @class */ (function () {
     }
     Board.prototype.Draw = function (htmlElement) {
         var element_GameBoard = document.querySelector(htmlElement);
+        element_GameBoard.innerHTML = "";
         for (var i = 0; i < 9; i++) {
             this.CreateCell(i, element_GameBoard);
         }
@@ -35,7 +36,7 @@ var Board = /** @class */ (function () {
         c.content = "";
         c.representation = el;
         var binding = c.SelectedCell.bind(c);
-        el.addEventListener("click", binding, true);
+        el.addEventListener("click", binding);
         this.cells.push(c);
         element_GameBoard.appendChild(el);
     };
@@ -59,24 +60,30 @@ var Board = /** @class */ (function () {
             this.DisplayDraw();
             return true;
         }
-        else {
-            if (this.CheckIfWon(this.playerTurn)) {
-                return true;
-            }
-            else
-                return false;
+        else if (this.CheckIfWon(this.playerTurn)) {
+            this.DisplayWin();
+            return true;
         }
+        else
+            return false;
     };
     Board.prototype.DisplayWin = function () {
         alert("Player " + this.playerTurn + " won");
-        this.Reset();
+        if (this.playerTurn == 1)
+            P1Score++;
+        if (this.playerTurn == 2)
+            P2Score++;
+        this.RefreshGameBoard();
     };
     Board.prototype.DisplayDraw = function () {
         alert("Draw");
-        this.Reset();
+        this.RefreshGameBoard();
     };
-    Board.prototype.Reset = function () {
+    Board.prototype.RefreshGameBoard = function () {
         this.Start();
+        element_Score_P1.innerHTML = "" + P1Score;
+        element_Score_P2.innerHTML = "" + P2Score;
+        this.movesAmount = 0;
         this.Draw("#game-board");
     };
     Board.prototype.CheckIfWon = function (player) {
@@ -86,39 +93,39 @@ var Board = /** @class */ (function () {
         else
             checkFor = P2;
         // will do cleaner way, for now would suffice
-        if (this.cells[0].content = checkFor,
-            this.cells[1].content = checkFor,
-            this.cells[2].content = checkFor) {
+        if (this.cells[0].content == checkFor &&
+            this.cells[1].content == checkFor &&
+            this.cells[2].content == checkFor) {
             return true;
         }
-        if (this.cells[0].content = checkFor,
-            this.cells[3].content = checkFor,
-            this.cells[6].content = checkFor) {
+        if (this.cells[0].content == checkFor &&
+            this.cells[3].content == checkFor &&
+            this.cells[6].content == checkFor) {
             return true;
         }
-        if (this.cells[0].content = checkFor,
-            this.cells[4].content = checkFor,
-            this.cells[8].content = checkFor) {
+        if (this.cells[0].content == checkFor &&
+            this.cells[4].content == checkFor &&
+            this.cells[8].content == checkFor) {
             return true;
         }
-        if (this.cells[1].content = checkFor,
-            this.cells[4].content = checkFor,
-            this.cells[7].content = checkFor) {
+        if (this.cells[1].content == checkFor &&
+            this.cells[4].content == checkFor &&
+            this.cells[7].content == checkFor) {
             return true;
         }
-        if (this.cells[2].content = checkFor,
-            this.cells[5].content = checkFor,
-            this.cells[8].content = checkFor) {
+        if (this.cells[2].content == checkFor &&
+            this.cells[5].content == checkFor &&
+            this.cells[8].content == checkFor) {
             return true;
         }
-        if (this.cells[3].content = checkFor,
-            this.cells[4].content = checkFor,
-            this.cells[5].content = checkFor) {
+        if (this.cells[3].content == checkFor &&
+            this.cells[4].content == checkFor &&
+            this.cells[5].content == checkFor) {
             return true;
         }
-        if (this.cells[6].content = checkFor,
-            this.cells[7].content = checkFor,
-            this.cells[8].content = checkFor) {
+        if (this.cells[6].content == checkFor &&
+            this.cells[7].content == checkFor &&
+            this.cells[8].content == checkFor) {
             return true;
         }
         return false;
@@ -140,8 +147,8 @@ var Cell = /** @class */ (function () {
             this.content = P2;
             this.representation.innerHTML = P2;
         }
-        this.representation.click = null;
         this.board.CellWasSelected();
+        this.representation.click = null;
     };
     return Cell;
 }());
