@@ -1,9 +1,22 @@
-class Point {
+class Point implements Drawable {
     x: number;
     y: number;
-    
+    canvas: HTMLCanvasElement;
+
+    constructor(canvas: HTMLCanvasElement){
+        
+    }
+
     CalculateDistance(to: Point): number {
-        return 0;
+        return Math.pow(to.x - this.x, 2) + Math.pow(to.y - this.y, 2);
+    }
+
+    Draw(){
+
+    }
+
+    Refresh(){
+        return;
     }
 }
 
@@ -20,3 +33,10 @@ class Item extends Circle {
     score: number;
     time: number;
 }
+
+interface Drawable{
+    canvas: HTMLCanvasElement;
+    Draw();
+    Refresh();
+}
+
