@@ -1,9 +1,11 @@
 {
     "compilerOptions": {
-        "outDir": "app",
-        "sourceMap": true
+        "lib": ["es5", "es6", "dom"],
+        "outFile": "app/App.js",
+        "sourceMap": true,
+        "module": "system"
     },
     "include": [
-        "src/*"
+        "src/*.ts"
     ]
 }
