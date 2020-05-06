@@ -7,7 +7,7 @@ export class Point  {
         this.y = y;
     }
 
-    CalculateDistance(to: Point): number {
+    calculateDistance(to: Point): number {
         return Math.pow(to.x - this.x, 2) + Math.pow(to.y - this.y, 2);
     }
 }
@@ -21,18 +21,41 @@ export class DrawablePoint extends Point implements Drawable{
         this.canvasCTX = ctx;
     }
 
-    Draw(){
-
+    draw(){
+        this.canvasCTX.fillRect(25,25,100,100);
     }
 
 }
 
 export class Circle extends DrawablePoint {
+    CIRCLE_CALC = 2 * Math.PI;
     radius: number;
     fill: string;
+
+    constructor(x: number, y: number, radius: number, ctx: CanvasRenderingContext2D){
+        super(x, y, ctx);
+        this.radius = radius;
+    }
+
+    draw(){
+        this.canvasCTX.beginPath();
+        this.canvasCTX.arc(
+            this.x, 
+            this.y,
+            this.radius,
+            0,
+            this.CIRCLE_CALC);
+        this.canvasCTX.stroke();
+        console.log(this.x + " " + this.y);
+    }
 }
 
 export class PlayerControlledBall extends Circle {
+    constructor(x, y, radius, ctx, speed){
+        super(x, y, radius, ctx);
+        this.speed = speed;
+        this.destination = new Point(0, 0);
+    }
     speed: number;
     destination: Point;
 }
@@ -45,7 +68,7 @@ export class Item extends Circle {
 
 export interface Drawable{
     canvasCTX: CanvasRenderingContext2D;
-    Draw();
+    draw();
 }
 
 export interface Collidable{

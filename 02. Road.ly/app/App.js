@@ -23,7 +23,7 @@ System.register("GameObjects", [], function (exports_1, context_1) {
                     this.x = x;
                     this.y = y;
                 }
-                Point.prototype.CalculateDistance = function (to) {
+                Point.prototype.calculateDistance = function (to) {
                     return Math.pow(to.x - this.x, 2) + Math.pow(to.y - this.y, 2);
                 };
                 return Point;
@@ -36,23 +36,36 @@ System.register("GameObjects", [], function (exports_1, context_1) {
                     _this.canvasCTX = ctx;
                     return _this;
                 }
-                DrawablePoint.prototype.Draw = function () {
+                DrawablePoint.prototype.draw = function () {
+                    this.canvasCTX.fillRect(25, 25, 100, 100);
                 };
                 return DrawablePoint;
             }(Point));
             exports_1("DrawablePoint", DrawablePoint);
             Circle = /** @class */ (function (_super) {
                 __extends(Circle, _super);
-                function Circle() {
-                    return _super !== null && _super.apply(this, arguments) || this;
+                function Circle(x, y, radius, ctx) {
+                    var _this = _super.call(this, x, y, ctx) || this;
+                    _this.CIRCLE_CALC = 2 * Math.PI;
+                    _this.radius = radius;
+                    return _this;
                 }
+                Circle.prototype.draw = function () {
+                    this.canvasCTX.beginPath();
+                    this.canvasCTX.arc(this.x, this.y, this.radius, 0, this.CIRCLE_CALC);
+                    this.canvasCTX.stroke();
+                    console.log(this.x + " " + this.y);
+                };
                 return Circle;
             }(DrawablePoint));
             exports_1("Circle", Circle);
             PlayerControlledBall = /** @class */ (function (_super) {
                 __extends(PlayerControlledBall, _super);
-                function PlayerControlledBall() {
-                    return _super !== null && _super.apply(this, arguments) || this;
+                function PlayerControlledBall(x, y, radius, ctx, speed) {
+                    var _this = _super.call(this, x, y, radius, ctx) || this;
+                    _this.speed = speed;
+                    _this.destination = new Point(0, 0);
+                    return _this;
                 }
                 return PlayerControlledBall;
             }(Circle));
@@ -102,21 +115,26 @@ System.register("Controller", ["GameObjects"], function (exports_2, context_2) {
         ],
         execute: function () {
             Controller = /** @class */ (function () {
-                function Controller() {
-                    this.playerControlledBall = new GameObjects_1.PlayerControlledBall(0, 0, null);
-                    window.addEventListener('deviceorientation', this.onDeviceOrientationChange, true);
+                function Controller(x, y) {
+                    var _this = this;
+                    this.playerControlledBall =
+                        new GameObjects_1.PlayerControlledBall(x, y, 50, null, 0.01);
+                    window.
+                        addEventListener('deviceorientation', (function (event) {
+                        _this.onDeviceOrientationChange(event);
+                    }), true);
                 }
                 Controller.prototype.setCanvasCTX = function (canvasCTX) {
                     this.playerControlledBall.canvasCTX = canvasCTX;
                 };
                 Controller.prototype.onDeviceOrientationChange = function (e) {
-                    this.ConsoleLogData(e);
-                    this.playerControlledBall.destination = new GameObjects_1.Point(e.alpha, e.beta);
+                    console.log(this);
+                    this.playerControlledBall.destination =
+                        new GameObjects_1.Point(e.alpha * this.playerControlledBall.speed, (e.beta - 45) * this.playerControlledBall.speed);
                 };
-                Controller.prototype.ConsoleLogData = function (e) {
-                    console.log(e.alpha, e.beta, e.gamma);
-                };
-                Controller.prototype.Update = function () {
+                Controller.prototype.update = function () {
+                    this.playerControlledBall.x += this.playerControlledBall.destination.x;
+                    this.playerControlledBall.y += this.playerControlledBall.destination.y;
                 };
                 return Controller;
             }());
@@ -156,6 +174,7 @@ System.register("Renderer", [], function (exports_4, context_4) {
                     this.screenSize = { x: 800, y: 600 };
                     this.getCanvas(canvasName);
                     this.setCanvasSize();
+                    this.objectsToDraw = new Array();
                 }
                 Renderer.prototype.getCanvas = function (canvasName) {
                     this.canvas = document.querySelector("#" + canvasName);
@@ -165,11 +184,24 @@ System.register("Renderer", [], function (exports_4, context_4) {
                     this.canvas.width = this.screenSize.x;
                     this.canvas.height = this.screenSize.y;
                 };
-                Renderer.prototype.Update = function () {
-                    this.Refresh();
+                Renderer.prototype.addObjectToDraw = function (object) {
+                    this.objectsToDraw.push(object);
+                };
+                Renderer.prototype.start = function () {
+                    var _this = this;
+                    this.objectsToDraw.forEach(function (element) {
+                        element.canvasCTX = _this.canvasCTX;
+                    });
+                };
+                Renderer.prototype.update = function () {
+                    this.refresh();
+                    console.log(this.objectsToDraw);
+                    this.objectsToDraw.forEach(function (element) {
+                        element.draw();
+                    });
                 };
                 ;
-                Renderer.prototype.Refresh = function () {
+                Renderer.prototype.refresh = function () {
                     this.canvasCTX.
                         clearRect(0, 0, this.screenSize.x, this.screenSize.y);
                 };
@@ -189,13 +221,13 @@ System.register("Generator", [], function (exports_5, context_5) {
             Generator = /** @class */ (function () {
                 function Generator() {
                 }
-                Generator.prototype.Generate = function (amount) {
+                Generator.prototype.generate = function (amount) {
                     while (amount > 0) {
                         amount--;
                         alert(amount);
                     }
                 };
-                Generator.prototype.SpawnPlayer = function (position) {
+                Generator.prototype.spawnPlayer = function (position) {
                 };
                 return Generator;
             }());
@@ -230,17 +262,19 @@ System.register("Game", ["Controller", "Timer", "Renderer", "Generator"], functi
                     };
                     this.renderer = new Renderer_1.Renderer("gameView");
                     this.timer = new Timer_1.Timer();
-                    this.controller = new Controller_1.Controller();
+                    this.controller = new Controller_1.Controller(this.renderer.screenSize.x / 2, this.renderer.screenSize.y / 2);
                     this.controller.setCanvasCTX(this.renderer.canvasCTX);
+                    this.renderer.addObjectToDraw(this.controller.playerControlledBall);
                     this.generator = new Generator_1.Generator();
                 }
-                Game.prototype.Start = function () {
-                    this.Update();
+                Game.prototype.start = function () {
+                    this.update();
                 };
-                Game.prototype.Update = function () {
-                    this.controller.Update();
-                    this.renderer.Update();
-                    window.requestAnimationFrame(this.Update);
+                Game.prototype.update = function () {
+                    console.log("test");
+                    this.controller.update();
+                    this.renderer.update();
+                    window.requestAnimationFrame(this.update.bind(this));
                 };
                 return Game;
             }());
@@ -261,6 +295,7 @@ System.register("App", ["Game"], function (exports_7, context_7) {
         execute: function () {
             window.onload = function () {
                 var game = new Game_1.Game();
+                game.start();
             };
         }
     };

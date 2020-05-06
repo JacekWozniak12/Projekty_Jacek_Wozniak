@@ -5,11 +5,12 @@ export class Renderer {
     
     canvas: HTMLCanvasElement;
     canvasCTX: CanvasRenderingContext2D;
-    objectsToDraw: Drawable;
+    objectsToDraw: Drawable[];
 
     constructor(canvasName: string) {
         this.getCanvas(canvasName);
         this.setCanvasSize();
+        this.objectsToDraw = new Array();
     }
 
     private getCanvas(canvasName: string) {
@@ -22,12 +23,25 @@ export class Renderer {
         this.canvas.height = this.screenSize.y;
     }
 
-    Update(){
-        this.Refresh();
-        
+    addObjectToDraw(object: Drawable){
+        this.objectsToDraw.push(object);
+    }
+
+    start(){
+        this.objectsToDraw.forEach(element => {
+            element.canvasCTX = this.canvasCTX;
+        });
+    }
+
+    update(){
+        this.refresh();
+        console.log(this.objectsToDraw);
+        this.objectsToDraw.forEach(element => {
+            element.draw();
+        });
     };
 
-    Refresh(){
+    refresh(){
         this.canvasCTX.
         clearRect(0, 0, this.screenSize.x, this.screenSize.y);
     }

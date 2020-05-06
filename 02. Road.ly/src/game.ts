@@ -19,20 +19,26 @@ export class Game{
         
         this.timer = new Timer();
 
-        this.controller = new Controller();
+        this.controller = new Controller(
+            this.renderer.screenSize.x/2, 
+            this.renderer.screenSize.y/2
+            );
         this.controller.setCanvasCTX(this.renderer.canvasCTX);
+
+        this.renderer.addObjectToDraw(this.controller.playerControlledBall);
 
         this.generator = new Generator();    
     }
 
-    Start(){
-        this.Update();
+    start(){
+        this.update();
     }
 
-    Update(){
-        this.controller.Update();
-        this.renderer.Update();
-        window.requestAnimationFrame(this.Update);
+    update(){
+        console.log("test");
+        this.controller.update();
+        this.renderer.update();
+        window.requestAnimationFrame(this.update.bind(this));
     }
     
 

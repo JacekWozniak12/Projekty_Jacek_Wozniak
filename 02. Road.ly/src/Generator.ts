@@ -6,7 +6,7 @@ export class Generator {
     StartAmountOfItems: number;
     TimeBeforeNextSpawn: number;
     
-    Generate(amount: number) {
+    generate(amount: number) {
         
         while(amount > 0){
             amount--;
@@ -14,7 +14,7 @@ export class Generator {
         }
     }
 
-    SpawnPlayer(position : Point){
+    spawnPlayer(position : Point){
         
     }
 
