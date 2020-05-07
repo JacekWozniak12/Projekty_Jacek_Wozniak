@@ -1,3 +1,4 @@
+import { Physics } from './Game';
 export class Point  {
     x: number;
     y: number;
@@ -7,8 +8,8 @@ export class Point  {
         this.y = y;
     }
 
-    calculateDistance(to: Point): number {
-        return Math.pow(to.x - this.x, 2) + Math.pow(to.y - this.y, 2);
+    calculateDistance(to: Point) : number {
+        return Math.sqrt(Math.pow(to.x - this.x, 2) + Math.pow(to.y - this.y, 2));
     }
 }
 
@@ -66,11 +67,11 @@ export class Ball extends Circle implements CollisionHandler{
         return Math.random() * x * this.speed;
     }
 
-    calculateCollision(){
+    calculateCollision(physics: Physics){
         this.move();
         if(!this.static){
             this.calculateCollisionsWithCanvas();
-            this.calculateCollisionsWithGameObject();
+            this.calculateCollisionsWithGameObject(physics);
         }
     }
 
@@ -79,13 +80,26 @@ export class Ball extends Circle implements CollisionHandler{
         this.y += this.destination.y;
     }
 
-    spawn(point: Point){
-        this.x = point.x;
-        this.y = point.y;
+    calculateCollisionsWithGameObject(physics: Physics){
+        physics.objectsToHandle.forEach(element => {
+            if(this == element){
+            }
+            else{
+            let a = element.calculateDistance(new Point(this.x, this.y));
+            let b = element as Ball;
+            if(Math.abs(a) - this.radius - b.radius <= 0){
+                console.log(a);
+                this.destination.x = this.clamp(this.x - element.x, -1, 1);
+                this.destination.y = this.clamp(this.y - element.y, -1, 1);
+            }
+        }
+        });
     }
 
-    calculateCollisionsWithGameObject(){
-
+    clamp(value: number, min : number, max: number) : number{
+        if(value < min) return min;
+        if(value > max) return max;
+        return value;
     }
 
     calculateCollisionsWithCanvas(){
@@ -127,10 +141,10 @@ export class PlayerControlledBall extends Ball implements CollisionHandler {
     static: boolean = false;
     weight: number = 1;
 
-    calculateCollision(){
+    calculateCollision(physics: Physics){
         if(!this.static){
             this.calculateCollisionsWithCanvas();
-            this.calculateCollisionsWithGameObject();
+            this.calculateCollisionsWithGameObject(physics);
         }
     }
 
@@ -148,8 +162,19 @@ export class PlayerControlledBall extends Ball implements CollisionHandler {
                 this.y = 0 + this.radius;                   
     }
 
-    calculateCollisionsWithGameObject(){
-        return;
+    calculateCollisionsWithGameObject(physics: Physics){
+        physics.objectsToHandle.forEach(element => {
+            if(this == element){
+            }
+            else{
+            let a = element.calculateDistance(new Point(this.x, this.y));
+            let b = element as Ball;
+            if(Math.abs(a) - this.radius - b.radius <= 0){
+                b.destination.x = this.clamp(element.x - this.x, -1, 1);
+                b.destination.y = this.clamp(element.y - this.y, -1, 1);
+            }
+        }
+        });
     }
 }
 
@@ -164,12 +189,12 @@ export interface Drawable{
     draw();
 }
 
-export interface CollisionHandler{
+export interface CollisionHandler extends Point{
     static: boolean;
     weight: number;
 
-    calculateCollision();
-    calculateCollisionsWithGameObject();
+    calculateCollision(physics: Physics);
+    calculateCollisionsWithGameObject(physics: Physics);
     calculateCollisionsWithCanvas();
 }
 
@@ -181,11 +206,6 @@ export interface Pickable{
 
 export interface Picker{
     pick();
-}
-
-export interface Collidable{
-    collisionSpot;
-
 }
 
 export class Rectangle{
@@ -202,11 +222,4 @@ export class Rectangle{
     }
 }
 
-export class CollisionTree{
-
-}
-
-export class CollisionBox{
-
-}
 

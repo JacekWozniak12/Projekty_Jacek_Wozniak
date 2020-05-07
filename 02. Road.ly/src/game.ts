@@ -26,7 +26,7 @@ export class Game{
             this.renderer.screenSize.x/2, 
             this.renderer.screenSize.y/2
             );
-            
+
         this.controller.setCanvasCTX(this.renderer.canvasCTX);
 
         this.renderer.addObjectToDraw(this.controller.playerControlledBall);
@@ -67,7 +67,7 @@ export class Physics{
 
     update(){
         this.objectsToHandle.forEach(element => {
-            element.calculateCollision();
+            element.calculateCollision(this);
         });
     };
 

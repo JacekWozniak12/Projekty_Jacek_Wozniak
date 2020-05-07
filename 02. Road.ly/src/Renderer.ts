@@ -35,7 +35,6 @@ export class Renderer {
 
     update(){
         this.refresh();
-        console.log(this.objectsToDraw);
         this.objectsToDraw.forEach(element => {
             element.draw();
         });
