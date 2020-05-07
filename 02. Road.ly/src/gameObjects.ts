@@ -50,7 +50,8 @@ export class Circle extends DrawablePoint {
     }
 }
 
-export class PlayerControlledBall extends Circle {
+export class PlayerControlledBall extends Circle implements CollisionHandler {
+    
     constructor(x, y, radius, ctx, speed){
         super(x, y, radius, ctx);
         this.speed = speed;
@@ -58,6 +59,35 @@ export class PlayerControlledBall extends Circle {
     }
     speed: number;
     destination: Point;
+
+    static: boolean = false;
+    weight: number = 1;
+
+    calculateCollision(){
+        if(!this.static){
+            this.calculateCollisionsWithCanvas();
+            this.calculateCollisionsWithGameObject();
+        }
+    }
+
+    calculateCollisionsWithCanvas(){
+            console.log(this.destination);
+            if((this.destination.x + this.x) + this.radius > this.canvasCTX.canvas.width) 
+                this.x = this.canvasCTX.canvas.width - this.radius;
+            else
+            if((this.destination.x + this.x) - this.radius < 0) 
+                this.x = 0 + this.radius;
+            
+            if((this.destination.y + this.y) + this.radius > this.canvasCTX.canvas.height) 
+            this.y = this.canvasCTX.canvas.height - this.radius;  
+            else 
+            if((this.destination.y + this.y) - this.radius < 0)
+            this.y = 0 + this.radius;                   
+    }
+
+    calculateCollisionsWithGameObject(){
+        return;
+    }
 }
 
 export class Item extends Circle {
@@ -71,16 +101,27 @@ export interface Drawable{
     draw();
 }
 
+export interface CollisionHandler{
+    static: boolean;
+    weight: number;
+
+    calculateCollision();
+    calculateCollisionsWithGameObject();
+    calculateCollisionsWithCanvas();
+}
+
+export interface Pickable{
+    canBePickedBy: Picker[];
+
+    getPicked();
+}
+
+export interface Picker{
+    pick();
+}
+
 export interface Collidable{
     collisionSpot;
-
-}
-
-export class CollisionTree{
-
-}
-
-export class CollisionBox{
 
 }
 
@@ -97,3 +138,12 @@ export class Rectangle{
         this.V = new Point(X.x, Y.y);
     }
 }
+
+export class CollisionTree{
+
+}
+
+export class CollisionBox{
+
+}
+

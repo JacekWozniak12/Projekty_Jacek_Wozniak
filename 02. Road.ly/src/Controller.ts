@@ -23,8 +23,8 @@ export class Controller {
         console.log(this);
         this.playerControlledBall.destination = 
         new Point(
-            e.alpha * this.playerControlledBall.speed, 
-            (e.beta - 45) * this.playerControlledBall.speed
+            (e.alpha) * this.playerControlledBall.speed * 4, 
+            (e.beta - 75) * this.playerControlledBall.speed * 6
             );
     }
 
