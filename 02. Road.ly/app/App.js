@@ -13,7 +13,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 System.register("GameObjects", [], function (exports_1, context_1) {
     "use strict";
-    var Point, DrawablePoint, Circle, PlayerControlledBall, Item, Rectangle, CollisionTree, CollisionBox;
+    var Point, DrawablePoint, Circle, Ball, PlayerControlledBall, Item, Rectangle, CollisionTree, CollisionBox;
     var __moduleName = context_1 && context_1.id;
     return {
         setters: [],
@@ -54,11 +54,67 @@ System.register("GameObjects", [], function (exports_1, context_1) {
                     this.canvasCTX.beginPath();
                     this.canvasCTX.arc(this.x, this.y, this.radius, 0, this.CIRCLE_CALC);
                     this.canvasCTX.stroke();
-                    console.log(this.x + " " + this.y);
                 };
                 return Circle;
             }(DrawablePoint));
             exports_1("Circle", Circle);
+            Ball = /** @class */ (function (_super) {
+                __extends(Ball, _super);
+                function Ball(x, y, radius, ctx) {
+                    var _this = _super.call(this, x, y, radius, ctx) || this;
+                    _this.static = false;
+                    _this.weight = 1;
+                    _this.speed = 5;
+                    _this.destination = new Point(_this.randomizeDestination(1), _this.randomizeDestination(1));
+                    return _this;
+                }
+                Ball.prototype.randomizeDestination = function (x) {
+                    return Math.random() * x * this.speed;
+                };
+                Ball.prototype.calculateCollision = function () {
+                    this.move();
+                    if (!this.static) {
+                        this.calculateCollisionsWithCanvas();
+                        this.calculateCollisionsWithGameObject();
+                    }
+                };
+                Ball.prototype.move = function () {
+                    this.x += this.destination.x;
+                    this.y += this.destination.y;
+                };
+                Ball.prototype.spawn = function (point) {
+                    this.x = point.x;
+                    this.y = point.y;
+                };
+                Ball.prototype.calculateCollisionsWithGameObject = function () {
+                };
+                Ball.prototype.calculateCollisionsWithCanvas = function () {
+                    this.HandleXCanvas();
+                    this.HandleYCanvas();
+                };
+                Ball.prototype.HandleYCanvas = function () {
+                    if ((this.destination.y + this.y) + this.radius > this.canvasCTX.canvas.height) {
+                        this.y = this.canvasCTX.canvas.height - this.radius;
+                        this.destination.y = this.randomizeDestination(-1);
+                    }
+                    else if ((this.destination.y + this.y) - this.radius < 0) {
+                        this.y = 0 + this.radius;
+                        this.destination.y = this.randomizeDestination(1);
+                    }
+                };
+                Ball.prototype.HandleXCanvas = function () {
+                    if ((this.destination.x + this.x) + this.radius > this.canvasCTX.canvas.width) {
+                        this.x = this.canvasCTX.canvas.width - this.radius;
+                        this.destination.x = this.randomizeDestination(-1);
+                    }
+                    else if ((this.destination.x + this.x) - this.radius < 0) {
+                        this.x = 0 + this.radius;
+                        this.destination.x = this.randomizeDestination(1);
+                    }
+                };
+                return Ball;
+            }(Circle));
+            exports_1("Ball", Ball);
             PlayerControlledBall = /** @class */ (function (_super) {
                 __extends(PlayerControlledBall, _super);
                 function PlayerControlledBall(x, y, radius, ctx, speed) {
@@ -76,7 +132,6 @@ System.register("GameObjects", [], function (exports_1, context_1) {
                     }
                 };
                 PlayerControlledBall.prototype.calculateCollisionsWithCanvas = function () {
-                    console.log(this.destination);
                     if ((this.destination.x + this.x) + this.radius > this.canvasCTX.canvas.width)
                         this.x = this.canvasCTX.canvas.width - this.radius;
                     else if ((this.destination.x + this.x) - this.radius < 0)
@@ -90,7 +145,7 @@ System.register("GameObjects", [], function (exports_1, context_1) {
                     return;
                 };
                 return PlayerControlledBall;
-            }(Circle));
+            }(Ball));
             exports_1("PlayerControlledBall", PlayerControlledBall);
             Item = /** @class */ (function (_super) {
                 __extends(Item, _super);
@@ -257,9 +312,9 @@ System.register("Generator", [], function (exports_5, context_5) {
         }
     };
 });
-System.register("Game", ["Controller", "Timer", "Renderer", "Generator"], function (exports_6, context_6) {
+System.register("Game", ["Controller", "Timer", "Renderer", "Generator", "GameObjects"], function (exports_6, context_6) {
     "use strict";
-    var Controller_1, Timer_1, Renderer_1, Generator_1, Game, Physics;
+    var Controller_1, Timer_1, Renderer_1, Generator_1, GameObjects_2, Game, Physics;
     var __moduleName = context_6 && context_6.id;
     return {
         setters: [
@@ -274,6 +329,9 @@ System.register("Game", ["Controller", "Timer", "Renderer", "Generator"], functi
             },
             function (Generator_1_1) {
                 Generator_1 = Generator_1_1;
+            },
+            function (GameObjects_2_1) {
+                GameObjects_2 = GameObjects_2_1;
             }
         ],
         execute: function () {
@@ -289,13 +347,15 @@ System.register("Game", ["Controller", "Timer", "Renderer", "Generator"], functi
                     this.controller.setCanvasCTX(this.renderer.canvasCTX);
                     this.renderer.addObjectToDraw(this.controller.playerControlledBall);
                     this.physics.addObjectToHandle(this.controller.playerControlledBall);
+                    var ball = new GameObjects_2.Ball(5, 5, 10, this.renderer.canvasCTX);
+                    this.renderer.addObjectToDraw(ball);
+                    this.physics.addObjectToHandle(ball);
                     this.generator = new Generator_1.Generator();
                 }
                 Game.prototype.start = function () {
                     this.update();
                 };
                 Game.prototype.update = function () {
-                    console.log("test");
                     this.controller.update();
                     this.physics.update();
                     this.renderer.update();
@@ -313,7 +373,7 @@ System.register("Game", ["Controller", "Timer", "Renderer", "Generator"], functi
                 };
                 Physics.prototype.update = function () {
                     this.objectsToHandle.forEach(function (element) {
-                        element.calculateCollisionsWithCanvas();
+                        element.calculateCollision();
                     });
                 };
                 ;

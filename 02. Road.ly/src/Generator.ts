@@ -17,7 +17,4 @@ export class Generator {
     spawnPlayer(position : Point){
         
     }
-
-    
-
 }

@@ -2,7 +2,7 @@ import { Controller } from "./Controller";
 import { Timer } from "./Timer";
 import { Renderer } from './Renderer';
 import { Generator } from './Generator';
-import { CollisionHandler } from './GameObjects';
+import { CollisionHandler, Ball } from './GameObjects';
 
 export class Game{
 
@@ -26,10 +26,16 @@ export class Game{
             this.renderer.screenSize.x/2, 
             this.renderer.screenSize.y/2
             );
+            
         this.controller.setCanvasCTX(this.renderer.canvasCTX);
 
         this.renderer.addObjectToDraw(this.controller.playerControlledBall);
         this.physics.addObjectToHandle(this.controller.playerControlledBall);
+        
+        let ball = new Ball(5, 5, 10, this.renderer.canvasCTX);
+
+        this.renderer.addObjectToDraw(ball);
+        this.physics.addObjectToHandle(ball);
     
         this.generator = new Generator();    
     }
@@ -39,7 +45,6 @@ export class Game{
     }
 
     update(){
-        console.log("test");
         this.controller.update();
         this.physics.update();
         this.renderer.update();
@@ -62,7 +67,7 @@ export class Physics{
 
     update(){
         this.objectsToHandle.forEach(element => {
-            element.calculateCollisionsWithCanvas();
+            element.calculateCollision();
         });
     };
 
