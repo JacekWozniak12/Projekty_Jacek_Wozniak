@@ -19,24 +19,47 @@ export class Game{
     renderer : Renderer;
     physics : Physics;
     generator : Generator;
+    
+    todefeat: number = 0;
+
+    timeDisplay: string = "timer";
+    timeBeforeChangeDisplay: string = "timer2";
+    result: string = "result";
+    rendererDisplay: string = "gameView";
+
+    element_timeDisplay : HTMLElement;
+    element_timeBeforeChangeDisplay : HTMLElement;
+    element_result: HTMLElement;
+    
+    timePassed: number = 0;
+
 
     constructor(){       
         this.setup();
     }
 
     private setup(){
-        this.renderer = new Renderer("gameView");
+        this.renderer = new Renderer(this.rendererDisplay);
+        
+        this.element_timeBeforeChangeDisplay = document.
+        querySelector("#" + this.timeBeforeChangeDisplay);
+        this.element_timeDisplay = document.
+        querySelector("#" + this.timeDisplay);
+        this.element_result = document.
+        querySelector("#" + this.result);
 
         this.timer = new Timer();
         this.physics = new Physics();
 
+        for(let i = 20; i < 200; i += 20){
+            this.AddBall(i, i);
+            this.todefeat++;  
+        }
+
         this.controller = new Controller(this.renderer.canvasCTX);
         this.renderer.addObjectToDraw(this.controller.playerControlledBall);
         this.physics.addObjectToHandle(this.controller.playerControlledBall);
-        
-        for(let i = 20; i < 200; i += 20){
-            this.AddBall(i, i);  
-        }
+    
     }
 
     private AddBall(x: number, y:number) {
@@ -67,21 +90,24 @@ export class Game{
             this.renderer.update();
             this.checkWinConditions();
             this.checkLoseConditions();
+            if(isNaN(this.timePassed)) this.timePassed = 0;
+            this.timePassed += this.timer.deltaTime;
+            this.element_timeDisplay.innerHTML = ""+this.timePassed.toFixed(1);
             window.requestAnimationFrame(this.update.bind(this));
         }
     }
     
     checkWinConditions() {
-        if(this.physics.objectsToHandle.length <= 1){
+        if(this.controller.playerControlledBall.eaten >= this.todefeat){
             this.state = State.WON;
-            // SET INFO
+            this.element_result.innerHTML = "Won";
         }
     }
 
     checkLoseConditions(){
         if(this.controller.playerControlledBall.defeated == true){
             this.state = State.LOST;
-            // SET INFO
+            this.element_result.innerHTML = "Lost";
         }
     }
 
@@ -95,7 +121,10 @@ export class Game{
             this.RandomizeColorOnObjects();
             this.howLongSinceColorChanged = 0;
         }
-        else this.howLongSinceColorChanged = this.howLongSinceColorChanged as number + this.timer.deltaTime as number;
+        else this.howLongSinceColorChanged = this.howLongSinceColorChanged + this.timer.deltaTime;
+
+        let b = 10 - this.howLongSinceColorChanged;
+        this.element_timeBeforeChangeDisplay.innerHTML = b.toFixed(2)+"";
     }
 
     private RandomizeColorOnObjects() {

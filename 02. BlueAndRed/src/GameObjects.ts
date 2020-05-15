@@ -58,11 +58,6 @@ export class Circle extends DrawablePoint {
     }
 }
 
-enum Colors{
-    RED = 0, 
-    BLUE
-}
-
 export class GameBall extends Circle implements CollisionHandler{
     static : boolean = false;
     weight : number = 1;
@@ -70,7 +65,6 @@ export class GameBall extends Circle implements CollisionHandler{
     speed: number = 5;
     defeated: boolean = false;
     destination: Point;
-    color : Colors;
 
     constructor(x: number, y: number, radius: number, ctx: CanvasRenderingContext2D)
     {
@@ -145,17 +139,20 @@ export class GameBall extends Circle implements CollisionHandler{
     }
 
     randomizeColor(){
+        if(this.defeated){
+            return;
+        }
+        else
         switch(Math.round(Math.random())){
-            case 0: this.SetColor(Colors.RED, this.redValue);
+            case 0: this.setColor(this.redValue);
             break;
-            case 1: this.SetColor(Colors.BLUE, this.blueValue);
+            case 1: this.setColor(this.blueValue);
             break;
             default: return;
         }
     }
 
-    private SetColor(state : Colors, colorValue : string) {
-        this.color = state;
+    setColor(colorValue : string) {
         this.colorValue = colorValue;
     }
 }
@@ -170,6 +167,7 @@ export class PlayerControlledBall extends GameBall implements CollisionHandler {
 
     static: boolean = false;
     weight: number = 1;
+    eaten: number = 0;
 
     calculateCollision(physics: Physics){
         if(!this.static){
@@ -207,11 +205,13 @@ export class PlayerControlledBall extends GameBall implements CollisionHandler {
     }
 
     eat(ball : GameBall){
-        if(this.color = ball.color){
+        if(this.colorValue == ball.colorValue && ball.defeated == false){
             ball.defeated = true;
+            ball.setColor("#fff");
+            this.eaten++;
         }
         else {
-            this.defeated = true;
+            if(ball.defeated == false) this.defeated = true;
         }
     }
 }

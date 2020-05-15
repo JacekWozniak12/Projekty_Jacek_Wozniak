@@ -40,7 +40,7 @@ System.register("Physics", [], function (exports_1, context_1) {
 });
 System.register("GameObjects", [], function (exports_2, context_2) {
     "use strict";
-    var Point, DrawablePoint, Circle, Colors, GameBall, PlayerControlledBall, Item, Rectangle;
+    var Point, DrawablePoint, Circle, GameBall, PlayerControlledBall, Item, Rectangle;
     var __moduleName = context_2 && context_2.id;
     return {
         setters: [],
@@ -92,10 +92,6 @@ System.register("GameObjects", [], function (exports_2, context_2) {
                 return Circle;
             }(DrawablePoint));
             exports_2("Circle", Circle);
-            (function (Colors) {
-                Colors[Colors["RED"] = 0] = "RED";
-                Colors[Colors["BLUE"] = 1] = "BLUE";
-            })(Colors || (Colors = {}));
             GameBall = /** @class */ (function (_super) {
                 __extends(GameBall, _super);
                 function GameBall(x, y, radius, ctx) {
@@ -169,18 +165,21 @@ System.register("GameObjects", [], function (exports_2, context_2) {
                     }
                 };
                 GameBall.prototype.randomizeColor = function () {
-                    switch (Math.round(Math.random())) {
-                        case 0:
-                            this.SetColor(Colors.RED, this.redValue);
-                            break;
-                        case 1:
-                            this.SetColor(Colors.BLUE, this.blueValue);
-                            break;
-                        default: return;
+                    if (this.defeated) {
+                        return;
                     }
+                    else
+                        switch (Math.round(Math.random())) {
+                            case 0:
+                                this.setColor(this.redValue);
+                                break;
+                            case 1:
+                                this.setColor(this.blueValue);
+                                break;
+                            default: return;
+                        }
                 };
-                GameBall.prototype.SetColor = function (state, colorValue) {
-                    this.color = state;
+                GameBall.prototype.setColor = function (colorValue) {
                     this.colorValue = colorValue;
                 };
                 return GameBall;
@@ -192,6 +191,7 @@ System.register("GameObjects", [], function (exports_2, context_2) {
                     var _this = _super.call(this, x, y, radius, ctx) || this;
                     _this.static = false;
                     _this.weight = 1;
+                    _this.eaten = 0;
                     _this.speed = speed;
                     _this.destination = new Point(0, 0);
                     return _this;
@@ -227,11 +227,14 @@ System.register("GameObjects", [], function (exports_2, context_2) {
                     });
                 };
                 PlayerControlledBall.prototype.eat = function (ball) {
-                    if (this.color = ball.color) {
+                    if (this.colorValue == ball.colorValue && ball.defeated == false) {
                         ball.defeated = true;
+                        ball.setColor("#fff");
+                        this.eaten++;
                     }
                     else {
-                        this.defeated = true;
+                        if (ball.defeated == false)
+                            this.defeated = true;
                     }
                 };
                 return PlayerControlledBall;
@@ -348,15 +351,8 @@ System.register("Renderer", [], function (exports_5, context_5) {
                     });
                 };
                 Renderer.prototype.update = function () {
-                    var _this = this;
                     this.refresh();
                     this.objectsToDraw.forEach(function (element) {
-                        var a = element;
-                        if (a.defeated) {
-                            _this.objectsToDraw =
-                                _this.objectsToDraw.filter(function (x) { x !== a; });
-                            return;
-                        }
                         element.draw();
                     });
                 };
@@ -404,18 +400,31 @@ System.register("Game", ["Controller", "Timer", "Renderer", "GameObjects", "Phys
             Game = /** @class */ (function () {
                 function Game() {
                     this.state = State.RUNNING;
+                    this.todefeat = 0;
+                    this.timeDisplay = "timer";
+                    this.timeBeforeChangeDisplay = "timer2";
+                    this.result = "result";
+                    this.rendererDisplay = "gameView";
+                    this.timePassed = 0;
                     this.setup();
                 }
                 Game.prototype.setup = function () {
-                    this.renderer = new Renderer_1.Renderer("gameView");
+                    this.renderer = new Renderer_1.Renderer(this.rendererDisplay);
+                    this.element_timeBeforeChangeDisplay = document.
+                        querySelector("#" + this.timeBeforeChangeDisplay);
+                    this.element_timeDisplay = document.
+                        querySelector("#" + this.timeDisplay);
+                    this.element_result = document.
+                        querySelector("#" + this.result);
                     this.timer = new Timer_1.Timer();
                     this.physics = new Physics_1.Physics();
+                    for (var i = 20; i < 200; i += 20) {
+                        this.AddBall(i, i);
+                        this.todefeat++;
+                    }
                     this.controller = new Controller_1.Controller(this.renderer.canvasCTX);
                     this.renderer.addObjectToDraw(this.controller.playerControlledBall);
                     this.physics.addObjectToHandle(this.controller.playerControlledBall);
-                    for (var i = 20; i < 200; i += 20) {
-                        this.AddBall(i, i);
-                    }
                 };
                 Game.prototype.AddBall = function (x, y) {
                     var ball = new GameObjects_2.GameBall(x, y, 10, this.renderer.canvasCTX);
@@ -439,19 +448,23 @@ System.register("Game", ["Controller", "Timer", "Renderer", "GameObjects", "Phys
                         this.renderer.update();
                         this.checkWinConditions();
                         this.checkLoseConditions();
+                        if (isNaN(this.timePassed))
+                            this.timePassed = 0;
+                        this.timePassed += this.timer.deltaTime;
+                        this.element_timeDisplay.innerHTML = "" + this.timePassed.toFixed(1);
                         window.requestAnimationFrame(this.update.bind(this));
                     }
                 };
                 Game.prototype.checkWinConditions = function () {
-                    if (this.physics.objectsToHandle.length <= 1) {
+                    if (this.controller.playerControlledBall.eaten >= this.todefeat) {
                         this.state = State.WON;
-                        // SET INFO
+                        this.element_result.innerHTML = "Won";
                     }
                 };
                 Game.prototype.checkLoseConditions = function () {
                     if (this.controller.playerControlledBall.defeated == true) {
                         this.state = State.LOST;
-                        // SET INFO
+                        this.element_result.innerHTML = "Lost";
                     }
                 };
                 Game.prototype.objectColors = function () {
@@ -464,6 +477,8 @@ System.register("Game", ["Controller", "Timer", "Renderer", "GameObjects", "Phys
                     }
                     else
                         this.howLongSinceColorChanged = this.howLongSinceColorChanged + this.timer.deltaTime;
+                    var b = 10 - this.howLongSinceColorChanged;
+                    this.element_timeBeforeChangeDisplay.innerHTML = b.toFixed(2) + "";
                 };
                 Game.prototype.RandomizeColorOnObjects = function () {
                     this.renderer.objectsToDraw.forEach(function (element) {

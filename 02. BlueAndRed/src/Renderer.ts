@@ -36,14 +36,6 @@ export class Renderer {
     update(){
         this.refresh();
         this.objectsToDraw.forEach(element => {
-            
-            let a = element as GameBall;
-
-            if(a.defeated){
-                this.objectsToDraw = 
-                this.objectsToDraw.filter(x => {x !== a});
-                return;
-            }
             element.draw();
         });
     };
