@@ -11,10 +11,37 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-System.register("GameObjects", [], function (exports_1, context_1) {
+System.register("Physics", [], function (exports_1, context_1) {
     "use strict";
-    var Point, DrawablePoint, Circle, Ball, PlayerControlledBall, Item, Rectangle;
+    var Physics;
     var __moduleName = context_1 && context_1.id;
+    return {
+        setters: [],
+        execute: function () {
+            Physics = /** @class */ (function () {
+                function Physics() {
+                    this.objectsToHandle = new Array();
+                }
+                Physics.prototype.addObjectToHandle = function (object) {
+                    this.objectsToHandle.push(object);
+                };
+                Physics.prototype.update = function () {
+                    var _this = this;
+                    this.objectsToHandle.forEach(function (element) {
+                        element.calculateCollision(_this);
+                    });
+                };
+                ;
+                return Physics;
+            }());
+            exports_1("Physics", Physics);
+        }
+    };
+});
+System.register("GameObjects", [], function (exports_2, context_2) {
+    "use strict";
+    var Point, DrawablePoint, Circle, Colors, GameBall, PlayerControlledBall, Item, Rectangle;
+    var __moduleName = context_2 && context_2.id;
     return {
         setters: [],
         execute: function () {
@@ -28,25 +55,30 @@ System.register("GameObjects", [], function (exports_1, context_1) {
                 };
                 return Point;
             }());
-            exports_1("Point", Point);
+            exports_2("Point", Point);
             DrawablePoint = /** @class */ (function (_super) {
                 __extends(DrawablePoint, _super);
                 function DrawablePoint(x, y, ctx) {
                     var _this = _super.call(this, x, y) || this;
+                    _this.colorValue = "#ccc";
                     _this.canvasCTX = ctx;
                     return _this;
                 }
                 DrawablePoint.prototype.draw = function () {
-                    this.canvasCTX.fillRect(25, 25, 100, 100);
+                    this.canvasCTX.fillStyle = this.colorValue;
+                    this.canvasCTX.fillRect(1, 1, 1, 1);
                 };
                 return DrawablePoint;
             }(Point));
-            exports_1("DrawablePoint", DrawablePoint);
+            exports_2("DrawablePoint", DrawablePoint);
             Circle = /** @class */ (function (_super) {
                 __extends(Circle, _super);
                 function Circle(x, y, radius, ctx) {
                     var _this = _super.call(this, x, y, ctx) || this;
                     _this.CIRCLE_CALC = 2 * Math.PI;
+                    _this.colorValue = "#000";
+                    _this.redValue = "#a00";
+                    _this.blueValue = "#00a";
                     _this.radius = radius;
                     return _this;
                 }
@@ -54,35 +86,42 @@ System.register("GameObjects", [], function (exports_1, context_1) {
                     this.canvasCTX.beginPath();
                     this.canvasCTX.arc(this.x, this.y, this.radius, 0, this.CIRCLE_CALC);
                     this.canvasCTX.stroke();
+                    this.canvasCTX.fillStyle = this.colorValue;
+                    this.canvasCTX.fill();
                 };
                 return Circle;
             }(DrawablePoint));
-            exports_1("Circle", Circle);
-            Ball = /** @class */ (function (_super) {
-                __extends(Ball, _super);
-                function Ball(x, y, radius, ctx) {
+            exports_2("Circle", Circle);
+            (function (Colors) {
+                Colors[Colors["RED"] = 0] = "RED";
+                Colors[Colors["BLUE"] = 1] = "BLUE";
+            })(Colors || (Colors = {}));
+            GameBall = /** @class */ (function (_super) {
+                __extends(GameBall, _super);
+                function GameBall(x, y, radius, ctx) {
                     var _this = _super.call(this, x, y, radius, ctx) || this;
                     _this.static = false;
                     _this.weight = 1;
                     _this.speed = 5;
+                    _this.defeated = false;
                     _this.destination = new Point(_this.randomizeDestination(1), _this.randomizeDestination(1));
                     return _this;
                 }
-                Ball.prototype.randomizeDestination = function (x) {
+                GameBall.prototype.randomizeDestination = function (x) {
                     return Math.random() * x * this.speed;
                 };
-                Ball.prototype.calculateCollision = function (physics) {
+                GameBall.prototype.calculateCollision = function (physics) {
                     this.move();
                     if (!this.static) {
                         this.calculateCollisionsWithCanvas();
                         this.calculateCollisionsWithGameObject(physics);
                     }
                 };
-                Ball.prototype.move = function () {
+                GameBall.prototype.move = function () {
                     this.x += this.destination.x;
                     this.y += this.destination.y;
                 };
-                Ball.prototype.calculateCollisionsWithGameObject = function (physics) {
+                GameBall.prototype.calculateCollisionsWithGameObject = function (physics) {
                     var _this = this;
                     physics.objectsToHandle.forEach(function (element) {
                         if (_this == element) {
@@ -98,18 +137,18 @@ System.register("GameObjects", [], function (exports_1, context_1) {
                         }
                     });
                 };
-                Ball.prototype.clamp = function (value, min, max) {
+                GameBall.prototype.clamp = function (value, min, max) {
                     if (value < min)
                         return min;
                     if (value > max)
                         return max;
                     return value;
                 };
-                Ball.prototype.calculateCollisionsWithCanvas = function () {
+                GameBall.prototype.calculateCollisionsWithCanvas = function () {
                     this.HandleXCanvas();
                     this.HandleYCanvas();
                 };
-                Ball.prototype.HandleYCanvas = function () {
+                GameBall.prototype.HandleYCanvas = function () {
                     if ((this.destination.y + this.y) + this.radius > this.canvasCTX.canvas.height) {
                         this.y = this.canvasCTX.canvas.height - this.radius;
                         this.destination.y = this.randomizeDestination(-1);
@@ -119,7 +158,7 @@ System.register("GameObjects", [], function (exports_1, context_1) {
                         this.destination.y = this.randomizeDestination(1);
                     }
                 };
-                Ball.prototype.HandleXCanvas = function () {
+                GameBall.prototype.HandleXCanvas = function () {
                     if ((this.destination.x + this.x) + this.radius > this.canvasCTX.canvas.width) {
                         this.x = this.canvasCTX.canvas.width - this.radius;
                         this.destination.x = this.randomizeDestination(-1);
@@ -129,9 +168,24 @@ System.register("GameObjects", [], function (exports_1, context_1) {
                         this.destination.x = this.randomizeDestination(1);
                     }
                 };
-                return Ball;
+                GameBall.prototype.randomizeColor = function () {
+                    switch (Math.round(Math.random())) {
+                        case 0:
+                            this.SetColor(Colors.RED, this.redValue);
+                            break;
+                        case 1:
+                            this.SetColor(Colors.BLUE, this.blueValue);
+                            break;
+                        default: return;
+                    }
+                };
+                GameBall.prototype.SetColor = function (state, colorValue) {
+                    this.color = state;
+                    this.colorValue = colorValue;
+                };
+                return GameBall;
             }(Circle));
-            exports_1("Ball", Ball);
+            exports_2("GameBall", GameBall);
             PlayerControlledBall = /** @class */ (function (_super) {
                 __extends(PlayerControlledBall, _super);
                 function PlayerControlledBall(x, y, radius, ctx, speed) {
@@ -167,15 +221,22 @@ System.register("GameObjects", [], function (exports_1, context_1) {
                             var a = element.calculateDistance(new Point(_this.x, _this.y));
                             var b = element;
                             if (Math.abs(a) - _this.radius - b.radius <= 0) {
-                                b.destination.x = _this.clamp(element.x - _this.x, -1, 1);
-                                b.destination.y = _this.clamp(element.y - _this.y, -1, 1);
+                                _this.eat(b);
                             }
                         }
                     });
                 };
+                PlayerControlledBall.prototype.eat = function (ball) {
+                    if (this.color = ball.color) {
+                        ball.defeated = true;
+                    }
+                    else {
+                        this.defeated = true;
+                    }
+                };
                 return PlayerControlledBall;
-            }(Ball));
-            exports_1("PlayerControlledBall", PlayerControlledBall);
+            }(GameBall));
+            exports_2("PlayerControlledBall", PlayerControlledBall);
             Item = /** @class */ (function (_super) {
                 __extends(Item, _super);
                 function Item() {
@@ -183,7 +244,7 @@ System.register("GameObjects", [], function (exports_1, context_1) {
                 }
                 return Item;
             }(Circle));
-            exports_1("Item", Item);
+            exports_2("Item", Item);
             Rectangle = /** @class */ (function () {
                 function Rectangle(X, Y) {
                     this.X = X;
@@ -193,14 +254,14 @@ System.register("GameObjects", [], function (exports_1, context_1) {
                 }
                 return Rectangle;
             }());
-            exports_1("Rectangle", Rectangle);
+            exports_2("Rectangle", Rectangle);
         }
     };
 });
-System.register("Controller", ["GameObjects"], function (exports_2, context_2) {
+System.register("Controller", ["GameObjects"], function (exports_3, context_3) {
     "use strict";
     var GameObjects_1, Controller;
-    var __moduleName = context_2 && context_2.id;
+    var __moduleName = context_3 && context_3.id;
     return {
         setters: [
             function (GameObjects_1_1) {
@@ -209,22 +270,17 @@ System.register("Controller", ["GameObjects"], function (exports_2, context_2) {
         ],
         execute: function () {
             Controller = /** @class */ (function () {
-                function Controller(x, y) {
+                function Controller(canvasCTX) {
                     var _this = this;
-                    this.playerControlledBall =
-                        new GameObjects_1.PlayerControlledBall(x, y, 50, null, 0.01);
+                    this.playerControlledBall = new GameObjects_1.PlayerControlledBall(canvasCTX.canvas.width / 2, canvasCTX.canvas.height / 2, 30, canvasCTX, 0.1);
                     window.
                         addEventListener('deviceorientation', (function (event) {
                         _this.onDeviceOrientationChange(event);
                     }), true);
                 }
-                Controller.prototype.setCanvasCTX = function (canvasCTX) {
-                    this.playerControlledBall.canvasCTX = canvasCTX;
-                };
                 Controller.prototype.onDeviceOrientationChange = function (e) {
-                    console.log(this);
                     this.playerControlledBall.destination =
-                        new GameObjects_1.Point((e.alpha) * this.playerControlledBall.speed * 4, (e.beta - 75) * this.playerControlledBall.speed * 6);
+                        new GameObjects_1.Point(e.alpha * this.playerControlledBall.speed, e.beta * this.playerControlledBall.speed);
                 };
                 Controller.prototype.update = function () {
                     this.playerControlledBall.x += this.playerControlledBall.destination.x;
@@ -232,34 +288,38 @@ System.register("Controller", ["GameObjects"], function (exports_2, context_2) {
                 };
                 return Controller;
             }());
-            exports_2("Controller", Controller);
+            exports_3("Controller", Controller);
         }
     };
 });
-System.register("Timer", [], function (exports_3, context_3) {
+System.register("Timer", [], function (exports_4, context_4) {
     "use strict";
     var Timer;
-    var __moduleName = context_3 && context_3.id;
+    var __moduleName = context_4 && context_4.id;
     return {
         setters: [],
         execute: function () {
             Timer = /** @class */ (function () {
                 function Timer() {
                 }
-                Timer.prototype.AddTime = function (value) {
+                Timer.prototype.update = function () {
+                    this.deltaTime = (Date.now() - this.previousDate) / 1000;
+                    this.previousDate = Date.now();
+                };
+                Timer.prototype.addTime = function (value) {
                     this.timeLeft += value;
                     return this.timeLeft;
                 };
                 return Timer;
             }());
-            exports_3("Timer", Timer);
+            exports_4("Timer", Timer);
         }
     };
 });
-System.register("Renderer", [], function (exports_4, context_4) {
+System.register("Renderer", [], function (exports_5, context_5) {
     "use strict";
     var Renderer;
-    var __moduleName = context_4 && context_4.id;
+    var __moduleName = context_5 && context_5.id;
     return {
         setters: [],
         execute: function () {
@@ -288,8 +348,15 @@ System.register("Renderer", [], function (exports_4, context_4) {
                     });
                 };
                 Renderer.prototype.update = function () {
+                    var _this = this;
                     this.refresh();
                     this.objectsToDraw.forEach(function (element) {
+                        var a = element;
+                        if (a.defeated) {
+                            _this.objectsToDraw =
+                                _this.objectsToDraw.filter(function (x) { x !== a; });
+                            return;
+                        }
                         element.draw();
                     });
                 };
@@ -300,37 +367,13 @@ System.register("Renderer", [], function (exports_4, context_4) {
                 };
                 return Renderer;
             }());
-            exports_4("Renderer", Renderer);
+            exports_5("Renderer", Renderer);
         }
     };
 });
-System.register("Generator", [], function (exports_5, context_5) {
+System.register("Game", ["Controller", "Timer", "Renderer", "GameObjects", "Physics"], function (exports_6, context_6) {
     "use strict";
-    var Generator;
-    var __moduleName = context_5 && context_5.id;
-    return {
-        setters: [],
-        execute: function () {
-            Generator = /** @class */ (function () {
-                function Generator() {
-                }
-                Generator.prototype.generate = function (amount) {
-                    while (amount > 0) {
-                        amount--;
-                        alert(amount);
-                    }
-                };
-                Generator.prototype.spawnPlayer = function (position) {
-                };
-                return Generator;
-            }());
-            exports_5("Generator", Generator);
-        }
-    };
-});
-System.register("Game", ["Controller", "Timer", "Renderer", "Generator", "GameObjects"], function (exports_6, context_6) {
-    "use strict";
-    var Controller_1, Timer_1, Renderer_1, Generator_1, GameObjects_2, Game, Physics;
+    var Controller_1, Timer_1, Renderer_1, GameObjects_2, Physics_1, State, Game;
     var __moduleName = context_6 && context_6.id;
     return {
         setters: [
@@ -343,60 +386,100 @@ System.register("Game", ["Controller", "Timer", "Renderer", "Generator", "GameOb
             function (Renderer_1_1) {
                 Renderer_1 = Renderer_1_1;
             },
-            function (Generator_1_1) {
-                Generator_1 = Generator_1_1;
-            },
             function (GameObjects_2_1) {
                 GameObjects_2 = GameObjects_2_1;
+            },
+            function (Physics_1_1) {
+                Physics_1 = Physics_1_1;
             }
         ],
         execute: function () {
+            (function (State) {
+                State[State["MENU"] = 0] = "MENU";
+                State[State["RUNNING"] = 1] = "RUNNING";
+                State[State["WON"] = 2] = "WON";
+                State[State["LOST"] = 3] = "LOST";
+            })(State || (State = {}));
+            exports_6("State", State);
             Game = /** @class */ (function () {
                 function Game() {
-                    this.state = {
-                        MENU: 0, RUNNING: 1, WON: 2, LOST: 3
-                    };
+                    this.state = State.RUNNING;
+                    this.setup();
+                }
+                Game.prototype.setup = function () {
                     this.renderer = new Renderer_1.Renderer("gameView");
                     this.timer = new Timer_1.Timer();
-                    this.physics = new Physics();
-                    this.controller = new Controller_1.Controller(this.renderer.screenSize.x / 2, this.renderer.screenSize.y / 2);
-                    this.controller.setCanvasCTX(this.renderer.canvasCTX);
+                    this.physics = new Physics_1.Physics();
+                    this.controller = new Controller_1.Controller(this.renderer.canvasCTX);
                     this.renderer.addObjectToDraw(this.controller.playerControlledBall);
                     this.physics.addObjectToHandle(this.controller.playerControlledBall);
-                    var ball = new GameObjects_2.Ball(5, 5, 10, this.renderer.canvasCTX);
+                    for (var i = 20; i < 200; i += 20) {
+                        this.AddBall(i, i);
+                    }
+                };
+                Game.prototype.AddBall = function (x, y) {
+                    var ball = new GameObjects_2.GameBall(x, y, 10, this.renderer.canvasCTX);
                     this.renderer.addObjectToDraw(ball);
                     this.physics.addObjectToHandle(ball);
-                    this.generator = new Generator_1.Generator();
-                }
+                };
                 Game.prototype.start = function () {
+                    this.howLongSinceColorChanged = 0;
+                    this.RandomizeColorOnObjects();
                     this.update();
                 };
+                Game.prototype.restart = function () {
+                    this.setup();
+                };
                 Game.prototype.update = function () {
-                    this.controller.update();
-                    this.physics.update();
-                    this.renderer.update();
-                    window.requestAnimationFrame(this.update.bind(this));
+                    if (this.state === State.RUNNING) {
+                        this.timer.update();
+                        this.objectColors();
+                        this.controller.update();
+                        this.physics.update();
+                        this.renderer.update();
+                        this.checkWinConditions();
+                        this.checkLoseConditions();
+                        window.requestAnimationFrame(this.update.bind(this));
+                    }
+                };
+                Game.prototype.checkWinConditions = function () {
+                    if (this.physics.objectsToHandle.length <= 1) {
+                        this.state = State.WON;
+                        // SET INFO
+                    }
+                };
+                Game.prototype.checkLoseConditions = function () {
+                    if (this.controller.playerControlledBall.defeated == true) {
+                        this.state = State.LOST;
+                        // SET INFO
+                    }
+                };
+                Game.prototype.objectColors = function () {
+                    if (isNaN(this.howLongSinceColorChanged)) {
+                        this.howLongSinceColorChanged = 0;
+                    }
+                    if (this.howLongSinceColorChanged >= 10) {
+                        this.RandomizeColorOnObjects();
+                        this.howLongSinceColorChanged = 0;
+                    }
+                    else
+                        this.howLongSinceColorChanged = this.howLongSinceColorChanged + this.timer.deltaTime;
+                };
+                Game.prototype.RandomizeColorOnObjects = function () {
+                    this.renderer.objectsToDraw.forEach(function (element) {
+                        var b = element;
+                        b.randomizeColor();
+                    });
+                };
+                Game.prototype.pause = function () {
+                    if (this.state === State.RUNNING)
+                        this.state = State.MENU;
+                    else
+                        this.state = State.RUNNING;
                 };
                 return Game;
             }());
             exports_6("Game", Game);
-            Physics = /** @class */ (function () {
-                function Physics() {
-                    this.objectsToHandle = new Array();
-                }
-                Physics.prototype.addObjectToHandle = function (object) {
-                    this.objectsToHandle.push(object);
-                };
-                Physics.prototype.update = function () {
-                    var _this = this;
-                    this.objectsToHandle.forEach(function (element) {
-                        element.calculateCollision(_this);
-                    });
-                };
-                ;
-                return Physics;
-            }());
-            exports_6("Physics", Physics);
         }
     };
 });

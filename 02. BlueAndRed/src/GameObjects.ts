@@ -1,4 +1,4 @@
-import { Physics } from './Game';
+import { Physics } from './Physics';
 export class Point  {
     x: number;
     y: number;
@@ -17,13 +17,16 @@ export class DrawablePoint extends Point implements Drawable{
     
     canvasCTX: CanvasRenderingContext2D; 
     
+    colorValue: string = "#ccc"; 
+
     constructor(x: number, y:number, ctx: CanvasRenderingContext2D){
         super(x, y);
         this.canvasCTX = ctx;
     }
 
     draw(){
-        this.canvasCTX.fillRect(25,25,100,100);
+        this.canvasCTX.fillStyle = this.colorValue;
+        this.canvasCTX.fillRect(1,1,1,1);
     }
 
 }
@@ -32,6 +35,9 @@ export class Circle extends DrawablePoint {
     CIRCLE_CALC = 2 * Math.PI;
     radius: number;
     fill: string;
+    colorValue = "#000";
+    redValue = "#a00";
+    blueValue = "#00a";
 
     constructor(x: number, y: number, radius: number, ctx: CanvasRenderingContext2D){
         super(x, y, ctx);
@@ -47,15 +53,24 @@ export class Circle extends DrawablePoint {
             0,
             this.CIRCLE_CALC);
         this.canvasCTX.stroke();
+        this.canvasCTX.fillStyle = this.colorValue;
+        this.canvasCTX.fill();
     }
 }
 
-export class Ball extends Circle implements CollisionHandler{
+enum Colors{
+    RED = 0, 
+    BLUE
+}
+
+export class GameBall extends Circle implements CollisionHandler{
     static : boolean = false;
     weight : number = 1;
 
     speed: number = 5;
+    defeated: boolean = false;
     destination: Point;
+    color : Colors;
 
     constructor(x: number, y: number, radius: number, ctx: CanvasRenderingContext2D)
     {
@@ -86,7 +101,7 @@ export class Ball extends Circle implements CollisionHandler{
             }
             else{
             let a = element.calculateDistance(new Point(this.x, this.y));
-            let b = element as Ball;
+            let b = element as GameBall;
             if(Math.abs(a) - this.radius - b.radius <= 0){
                 console.log(a);
                 this.destination.x = this.clamp(this.x - element.x, -1, 1);
@@ -128,9 +143,24 @@ export class Ball extends Circle implements CollisionHandler{
             this.destination.x = this.randomizeDestination(1);
         }
     }
+
+    randomizeColor(){
+        switch(Math.round(Math.random())){
+            case 0: this.SetColor(Colors.RED, this.redValue);
+            break;
+            case 1: this.SetColor(Colors.BLUE, this.blueValue);
+            break;
+            default: return;
+        }
+    }
+
+    private SetColor(state : Colors, colorValue : string) {
+        this.color = state;
+        this.colorValue = colorValue;
+    }
 }
 
-export class PlayerControlledBall extends Ball implements CollisionHandler {
+export class PlayerControlledBall extends GameBall implements CollisionHandler {
     
     constructor(x, y, radius, ctx, speed){
         super(x, y, radius, ctx);
@@ -167,14 +197,22 @@ export class PlayerControlledBall extends Ball implements CollisionHandler {
             if(this == element){
             }
             else{
-            let a = element.calculateDistance(new Point(this.x, this.y));
-            let b = element as Ball;
+                let a = element.calculateDistance(new Point(this.x, this.y));
+                let b = element as GameBall;
             if(Math.abs(a) - this.radius - b.radius <= 0){
-                b.destination.x = this.clamp(element.x - this.x, -1, 1);
-                b.destination.y = this.clamp(element.y - this.y, -1, 1);
+                this.eat(b);
             }
         }
         });
+    }
+
+    eat(ball : GameBall){
+        if(this.color = ball.color){
+            ball.defeated = true;
+        }
+        else {
+            this.defeated = true;
+        }
     }
 }
 

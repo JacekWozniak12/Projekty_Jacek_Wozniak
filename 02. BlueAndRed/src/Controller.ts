@@ -4,9 +4,13 @@ export class Controller {
     
     playerControlledBall : PlayerControlledBall;
     
-    constructor(x: number, y: number) {
-        this.playerControlledBall = 
-        new PlayerControlledBall(x, y, 50, null, 0.01);
+    constructor(canvasCTX : CanvasRenderingContext2D) {
+        this.playerControlledBall = new PlayerControlledBall(
+            canvasCTX.canvas.width/2, 
+            canvasCTX.canvas.height/2, 
+            30, 
+            canvasCTX, 
+            0.1);
         window.
         addEventListener(
             'deviceorientation', 
@@ -15,16 +19,11 @@ export class Controller {
             }) as EventListener, true);
     }
 
-    setCanvasCTX(canvasCTX : CanvasRenderingContext2D){
-        this.playerControlledBall.canvasCTX = canvasCTX;
-    }
-
     onDeviceOrientationChange(e: any): void {
-        console.log(this);
         this.playerControlledBall.destination = 
         new Point(
-            (e.alpha) * this.playerControlledBall.speed * 4, 
-            (e.beta - 75) * this.playerControlledBall.speed * 6
+            e.alpha * this.playerControlledBall.speed, 
+            e.beta * this.playerControlledBall.speed
             );
     }
 

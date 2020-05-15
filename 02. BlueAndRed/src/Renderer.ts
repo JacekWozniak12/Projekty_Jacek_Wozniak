@@ -1,4 +1,4 @@
-import { Drawable } from './GameObjects';
+import { Drawable, GameBall } from './GameObjects';
 
 export class Renderer {
     screenSize = {x:800, y:600};
@@ -36,6 +36,14 @@ export class Renderer {
     update(){
         this.refresh();
         this.objectsToDraw.forEach(element => {
+            
+            let a = element as GameBall;
+
+            if(a.defeated){
+                this.objectsToDraw = 
+                this.objectsToDraw.filter(x => {x !== a});
+                return;
+            }
             element.draw();
         });
     };
